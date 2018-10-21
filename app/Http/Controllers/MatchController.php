@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Match;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\DB;
 
 class MatchController extends Controller {
 
@@ -18,7 +20,7 @@ class MatchController extends Controller {
      * @return \Illuminate\Http\JsonResponse
      */
     public function matches() {
-        return response()->json($this->fakeMatches());
+        return response()->json($this->getMatches());
     }
 
     /**
@@ -30,17 +32,21 @@ class MatchController extends Controller {
      * @return \Illuminate\Http\JsonResponse
      */
     public function match($id) {
-        return response()->json([
-            'id' => $id,
-            'name' => 'Match'.$id,
-            'next' => 2,
-            'winner' => 0,
-            'board' => [
-                1, 0, 2,
-                0, 1, 2,
-                0, 0, 0,
-            ],
-        ]);
+        $match = $this->getMatch($id);
+        return response()->json($match);
+    }
+
+    /**
+     * Returns a match with the board as an array
+     *
+     * @param $id
+     * @return \App\Match
+     */
+    public function getMatch($id)
+    {
+        $match = New Match;
+        $match = $match->getMatch($id);
+        return $match;
     }
 
     /**
@@ -52,22 +58,15 @@ class MatchController extends Controller {
      * @return \Illuminate\Http\JsonResponse
      */
     public function move($id) {
-        $board = [
-            1, 0, 2,
-            0, 1, 2,
-            0, 0, 0,
-        ];
-
         $position = Input::get('position');
-        $board[$position] = 2;
-
-        return response()->json([
-            'id' => $id,
-            'name' => 'Match'.$id,
-            'next' => 1,
-            'winner' => 0,
-            'board' => $board,
-        ]);
+        $match = $this->getMatch($id);
+        $match->makeMove($position);
+        $match->changeNext();
+        $match->detectWinner();
+        $match->save();
+        $match->board = array_map('intval', explode(',', $match->board));
+        $matchArray = array("id" => $match->id, 'name' => $match->name, 'next' => $match->next, 'winner' => $match->winner, 'board' => $match->board);
+        return response()->json($matchArray);
     }
 
     /**
@@ -78,7 +77,10 @@ class MatchController extends Controller {
      * @return \Illuminate\Http\JsonResponse
      */
     public function create() {
-        return response()->json($this->fakeMatches());
+        $lastMatch = Match::orderBy('id', 'DESC')->first();
+        $id = $lastMatch->id + 1;
+        Match::create(['name' => 'Match'.$id, 'next' => 1, 'winner' => 0, 'board' => Match::EMPTYBOARD]);
+        return response()->json($this->getMatches());
     }
 
     /**
@@ -90,9 +92,17 @@ class MatchController extends Controller {
      * @return \Illuminate\Http\JsonResponse
      */
     public function delete($id) {
-        return response()->json($this->fakeMatches()->filter(function($match) use($id){
-            return $match['id'] != $id;
-        })->values());
+        Match::destroy($id);
+        return response()->json($this->getMatches());
+    }
+
+    /**
+     * Get an array of matches
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getMatches() {
+        return Match::all();
     }
 
     /**
