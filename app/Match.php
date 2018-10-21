@@ -24,8 +24,12 @@ class Match extends Model
     public function getMatch($id)
     {
         $match = parent::find($id);
-        $match->board = array_map('intval', explode(',', $match->board));
-        return $match;
+        if($match)
+        {
+            $match->board = array_map('intval', explode(',', $match->board));
+            return $match;
+        }
+        return false;
     }
 
     public function changeNext()
@@ -52,16 +56,19 @@ class Match extends Model
         if($this->horizontalWinner() !== false)
         {
             $this->winner = $this->horizontalWinner();
+            $this->next = 0;
         }
 
         if($this->verticalWinner() !== false)
         {
             $this->winner = $this->verticalWinner();
+            $this->next = 0;
         }
 
         if($this->diagonalWinner() !== false)
         {
             $this->winner = $this->diagonalWinner();
+            $this->next = 0;
         }
     }
 

@@ -12,7 +12,6 @@
 */
 
 Route::view('/', 'index');
-Route::get('test/{id}', 'MatchController@test')->name('test');
 Route::prefix('api')->group(function () {
     Route::get('match', 'MatchController@matches')->name('matches');
     Route::get('match/{id}', 'MatchController@match')->name('match');

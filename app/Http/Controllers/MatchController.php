@@ -60,12 +60,19 @@ class MatchController extends Controller {
     public function move($id) {
         $position = Input::get('position');
         $match = $this->getMatch($id);
-        $match->makeMove($position);
-        $match->changeNext();
-        $match->detectWinner();
-        $match->save();
-        $match->board = array_map('intval', explode(',', $match->board));
-        $matchArray = array("id" => $match->id, 'name' => $match->name, 'next' => $match->next, 'winner' => $match->winner, 'board' => $match->board);
+        if($match)
+        {
+            $match->makeMove($position);
+            $match->changeNext();
+            $match->detectWinner();
+            $match->save();
+            $match->board = array_map('intval', explode(',', $match->board));
+            $matchArray = array("id" => $match->id, 'name' => $match->name, 'next' => $match->next, 'winner' => $match->winner, 'board' => $match->board);
+        }
+        else
+        {
+            $matchArray = false;
+        }
         return response()->json($matchArray);
     }
 
@@ -77,8 +84,12 @@ class MatchController extends Controller {
      * @return \Illuminate\Http\JsonResponse
      */
     public function create() {
+        $id = 1;
         $lastMatch = Match::orderBy('id', 'DESC')->first();
-        $id = $lastMatch->id + 1;
+        if($lastMatch)
+        {
+            $id = $lastMatch->id + 1;
+        }
         Match::create(['name' => 'Match'.$id, 'next' => 1, 'winner' => 0, 'board' => Match::EMPTYBOARD]);
         return response()->json($this->getMatches());
     }
