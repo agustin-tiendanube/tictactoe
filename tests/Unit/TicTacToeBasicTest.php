@@ -9,6 +9,8 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
+// REVIEW: Los tests cubren funcionalidad básica,
+// No validan toda la lógica del juego.
 class TicTacToeBasicTest extends TestCase
 {
 	use DatabaseMigrations;

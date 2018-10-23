@@ -62,6 +62,9 @@ class MatchController extends Controller {
         $match = $this->getMatch($id);
         if($match)
         {
+            // REVIEW: la complejidad de hacer un movimiento debería estar
+            // encapsulada en Match, y no depender de que los clientes (en este caso
+            // MatchController) conozcan el orden de pasos a realizar.
             $match->makeMove($position);
             $match->changeNext();
             $match->detectWinner();
@@ -71,6 +74,7 @@ class MatchController extends Controller {
         }
         else
         {
+            // REVIEW: false no es un tipo de array válido
             $matchArray = false;
         }
         return response()->json($matchArray);

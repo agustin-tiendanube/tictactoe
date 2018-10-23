@@ -34,6 +34,8 @@ class Match extends Model
 
     public function changeNext()
     {
+        // REVIEW podría ser resuelto con:
+        // $this->next = $this->next == 1 ? 2 : 1;
         if($this->next == 1)
         {
             $this->next = 2;
@@ -53,6 +55,8 @@ class Match extends Model
 
     public function detectWinner()
     {
+        // REVIEW: Llamar a horizontalWinner acá y adentro del if hace que se
+        // repita el proceso de validación. Igual que en el resto
         if($this->horizontalWinner() !== false)
         {
             $this->winner = $this->horizontalWinner();
@@ -72,6 +76,7 @@ class Match extends Model
         }
     }
 
+    // REVIEW: Esta solución funciona y es clara, pero repite mucho código
     public function horizontalWinner()
     {
         $boardArray = explode(",", $this->board);
